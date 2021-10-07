@@ -20,18 +20,29 @@ def local_cdist(coords_i, coords, spherical):
     """
     Compute Haversine (spherical=True) or Euclidean (spherical=False) distance for a local kernel.
     """
+    coords=np.array(coords)
     if spherical:
-        dLat = np.radians(coords[:, 1] - coords_i[1])
-        dLon = np.radians(coords[:, 0] - coords_i[0])
-        lat1 = np.radians(coords[:, 1])
-        lat2 = np.radians(coords_i[1])
-        a = np.sin(
-            dLat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dLon / 2)**2
-        c = 2 * np.arcsin(np.sqrt(a))
+        dLat_1 = np.radians(coords[:, 1] - coords_i[1])
+        dLon_1 = np.radians(coords[:, 0] - coords_i[0])
+        lat1_1 = np.radians(coords[:, 1])
+        lat2_1 = np.radians(coords_i[1])
+        a_1 = np.sin(
+            dLat_1 / 2)**2 + np.cos(lat1_1) * np.cos(lat2_1) * np.sin(dLon_1 / 2)**2
+        c_1 = 2 * np.arcsin(np.sqrt(a_1))
+        
+        dLat_2 = np.radians(coords[:, 3] - coords_i[3])
+        dLon_2 = np.radians(coords[:, 2] - coords_i[2])
+        lat1_2 = np.radians(coords[:, 3])
+        lat2_2 = np.radians(coords_i[3])
+        a_2 = np.sin(
+            dLat_2 / 2)**2 + np.cos(lat1_2) * np.cos(lat2_2) * np.sin(dLon_2 / 2)**2
+        c_2 = 2 * np.arcsin(np.sqrt(a_2))
         R = 6371.0
-        return R * c
+        
+        return R*(c_1+c_2)/1.60934
     else:
-        return np.sqrt(np.sum((coords_i - coords)**2, axis=1))
+        return (np.sqrt(np.sum((coords_i[0:2] - coords[:, 0:2])**2, axis=1)) +\
+    np.sqrt(np.sum((coords_i[2:] - coords[:, 2:])**2, axis=1)))/1609.34
 
 
 class Kernel(object):
