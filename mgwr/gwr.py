@@ -207,13 +207,13 @@ class GWR(GLM):
 
     """
     # Implement CV Ridge Regression Solution Function
-    def closed_form_reg_solution(X,y): 
+    def closed_form_reg_solution(y, x, wi): 
     '''Closed form solution for ridge regression'''
-    cvfit = cvglmnet.cvglmnet(x = x.copy(), y = y.copy(), ptype = 'mse', nfolds = 10)
+    cvfit = cvglmnet.cvglmnet(x = x.copy()* wi, y = y.copy(), ptype = 'mse', nfolds = 10)
     lamda=cvfit['lambda_min']
-    m,n = X.shape
+    m,n = x.shape
     I = np.eye((n))
-    inv_xtx_xt =np.linalg.inv(X.T @ X + lamda * I) @ X.T
+    inv_xtx_xt =np.linalg.inv(x.T @ x + lamda * I) @ x.T
     betas=inv_xtx_xt @ y [:,0]
     return betas, inv_xtx_xt
 
@@ -263,7 +263,7 @@ class GWR(GLM):
         wi = self._build_wi(i, self.bw).reshape(-1, 1)  #local spatial weights
 
         if isinstance(self.family, Gaussian):
-            betas, inv_xtx_xt = _compute_betas_gwr(self.y, self.X, wi)
+            betas, inv_xtx_xt = closed_form_reg_solution(self.y, self.X, wi)
             predy = np.dot(self.X[i], betas)[0]
             resid = self.y[i] - predy
             influ = np.dot(self.X[i], inv_xtx_xt[:, i])
