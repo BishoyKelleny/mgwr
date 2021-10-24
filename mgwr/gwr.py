@@ -16,7 +16,10 @@ from .diagnostics import get_AIC, get_AICc, get_BIC, corr
 from .kernels import *
 from .summary import *
 import multiprocessing as mp
-
+import glmnet_python
+from glmnet import glmnet
+import cvglmnet
+import cvglmnetCoef
 
 class GWR(GLM):
     """
@@ -203,6 +206,18 @@ class GWR(GLM):
     (10, 4)
 
     """
+    # Implement CV Ridge Regression Solution Function
+    def closed_form_reg_solution(X,y): 
+    '''Closed form solution for ridge regression'''
+    cvfit = cvglmnet.cvglmnet(x = x.copy(), y = y.copy(), ptype = 'mse', nfolds = 10)
+    lamda=cvfit['lambda_min']
+    m,n = X.shape
+    I = np.eye((n))
+    inv_xtx_xt =np.linalg.inv(X.T @ X + lamda * I) @ X.T
+    betas=inv_xtx_xt @ y [:,0]
+    return betas, inv_xtx_xt
+
+
 
     def __init__(self, coords, y, X, bw, family=Gaussian(), offset=None,
                  sigma2_v1=True, kernel='bisquare', fixed=False, constant=True,
